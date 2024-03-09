@@ -1,11 +1,32 @@
-import tkinter as tk
-from pages.example import mi_funcion
+import flet as ft
 
-root = tk.Tk()
+def main(page: ft.Page):
+    page.title = "Flet counter example"
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
-text = "\n".join(str(i) for i in range(1, 11))
-text2 = "\n"+str(mi_funcion())+" Funcion"
-label = tk.Label(root, text=text+text2, font=("Helvetica", 16))
+    txt_number = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=100)
 
-label.pack()
-root.mainloop()
+    def minus_click(e):
+        txt_number.value = str(int(txt_number.value) - 1)
+        page.update()
+
+    def plus_click(e):
+        txt_number.value = str(int(txt_number.value) + 1)
+        page.update()
+    def floatingActionButton_click(e):
+        txt_number.value = str(int(txt_number.value) * 2)
+        page.update()
+
+    page.add(
+        ft.Row(
+            [
+                ft.IconButton(ft.icons.REMOVE, on_click=minus_click),
+                txt_number,
+                ft.IconButton(ft.icons.ADD, on_click=plus_click),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+        ),
+        ft.FloatingActionButton(ft.icons.REFRESH, on_click=lambda e: floatingActionButton_click(e)),
+    )
+
+ft.app(target=main)
