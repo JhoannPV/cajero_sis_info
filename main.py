@@ -1,32 +1,81 @@
 import flet as ft
 
 def main(page: ft.Page):
-    page.title = "Flet counter example"
+    page.title = "Cajero automático"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
-    txt_number = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=100)
+    billetes = [10000, 20000, 50000, 100000]
+    cantidad = [0, 0, 0, 0]
+    retiro = 0
+    cantidad_text1 = ft.Text(value=str(cantidad[0]))
+    cantidad_text2 = ft.Text(value=str(cantidad[1]))
+    cantidad_text3 = ft.Text(value=str(cantidad[2]))
+    cantidad_text4 = ft.Text(value=str(cantidad[3]))
 
-    def minus_click(e):
-        txt_number.value = str(int(txt_number.value) - 1)
+    opciones_retiro = ft.Dropdown(
+        width=100,
+        options=[
+            ft.dropdown.Option(text="20.000", key="20000"),
+            ft.dropdown.Option(text="50.000", key="50000"),
+            ft.dropdown.Option(text="100.000", key="100000"),
+            ft.dropdown.Option(text="200.000", key="200000"),
+            ft.dropdown.Option(text="500.000", key="500000"),
+            ft.dropdown.Option(text="1.000.000", key="1000000"),
+        ],
+    )
+
+    def retirar(e):
+        nonlocal retiro, cantidad, billetes
+        nonlocal cantidad_text1, cantidad_text2, cantidad_text3, cantidad_text4
+        if retiro > 0:
+            for i in range(4):
+                for j in range(i, 4):
+                    if retiro >= billetes[j]:
+                        retiro -= billetes[j]
+                        cantidad[j] += 1
+                    if retiro == 0:
+                        break
+                    if j == 3 and i == 3 and retiro > 0:
+                        retirar(e)
+        cantidad_text1.value = str(cantidad[0])
+        cantidad_text2.value = str(cantidad[1])
+        cantidad_text3.value = str(cantidad[2])
+        cantidad_text4.value = str(cantidad[3])
         page.update()
 
-    def plus_click(e):
-        txt_number.value = str(int(txt_number.value) + 1)
-        page.update()
-    def floatingActionButton_click(e):
-        txt_number.value = str(int(txt_number.value) * 2)
-        page.update()
-
+    def before_retirar(e):
+        nonlocal cantidad, retiro, opciones_retiro
+        cantidad = [0, 0, 0, 0]
+        if opciones_retiro.value is not None:
+            retiro = int(opciones_retiro.value)
+        else:
+            retiro = 0
+        retirar(e)    
+    
     page.add(
-        ft.Row(
-            [
-                ft.IconButton(ft.icons.REMOVE, on_click=minus_click),
-                txt_number,
-                ft.IconButton(ft.icons.ADD, on_click=plus_click),
-            ],
-            alignment=ft.MainAxisAlignment.CENTER,
-        ),
-        ft.FloatingActionButton(ft.icons.REFRESH, on_click=lambda e: floatingActionButton_click(e)),
+        ft.Row([
+            ft.Text("¿Cuanto desea retirar?", style=ft.TextStyle(size=20, weight=ft.FontWeight.BOLD)),
+            opciones_retiro,
+        ], alignment=ft.MainAxisAlignment.CENTER),
+        ft.Row([   
+            ft.Column([
+                ft.Text("Billetes de 10.000"),
+                cantidad_text1,
+            ], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Column([
+                ft.Text("Billetes de 20.000"),
+                cantidad_text2,
+            ], alignment=ft.MainAxisAlignment.CENTER,),
+            ft.Column([
+                ft.Text("Billetes de 50.000"),
+                cantidad_text3,
+            ], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Column([
+                ft.Text("Billetes de 100.000"),
+                cantidad_text4,
+            ],alignment=ft.MainAxisAlignment.CENTER),
+        ], alignment=ft.MainAxisAlignment.CENTER),
+        ft.FloatingActionButton(text="Retirar", on_click= lambda e: before_retirar(e)),
     )
 
 ft.app(target=main)
